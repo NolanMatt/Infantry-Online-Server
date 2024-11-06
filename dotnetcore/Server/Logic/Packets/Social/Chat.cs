@@ -35,7 +35,52 @@ namespace InfServer.Logic
                     }
                 }
             }                  
+            if (pkt.message == "?oos")
+            {
+                 // Raw diagnostic output.
+                var actualArena = player._server._arenas.FirstOrDefault(a => a.Value.Players.FirstOrDefault(p => p._alias == player._alias) != null);
 
+                var arenaName = actualArena.Value != null ? actualArena.Value._name : "Not found!";
+                var inArena = player._arena != null ? player._arena._name : "No Arena!";
+                var ingame = player._bIngame ? "Yes" : "No!";
+                var spectator = player.IsSpectator ? "Yes" : "No";
+
+                SC_Chat rawResponse = new SC_Chat();
+                rawResponse.chatType = Helpers.Chat_Type.Arena;
+                rawResponse.message = $"Player Alias: {player._alias}. Assumed Arena: {inArena}. Found Arena: {arenaName}";
+                rawResponse.from = "";
+
+                player._client.send(rawResponse);
+
+                rawResponse = new SC_Chat();
+                rawResponse.chatType = Helpers.Chat_Type.Arena;
+                rawResponse.message = $"Last Packet Received: {player._client._lastPacketRecv}. Last Packet Sent: {player._client._lastPacketSent}. Current Time: {Environment.TickCount}. Time Diff: {player._client._timeDiff}";
+                rawResponse.from = "";
+
+                player._client.send(rawResponse);
+
+                rawResponse = new SC_Chat();
+                rawResponse.chatType = Helpers.Chat_Type.Arena;
+                rawResponse.message = $"Player Id: {player._id}. In game? {ingame}. Spectating? {spectator}";
+                rawResponse.from = "";
+
+                player._client.send(rawResponse);
+
+                foreach (var stream in player._client._streams)
+                {
+                    stream.C2S_Reliable = 0;
+                    stream.S2C_Reliable = 0;
+                    stream.S2C_ReliableConfirmed = 0;
+                    rawResponse = new SC_Chat();
+                    rawResponse.chatType = Helpers.Chat_Type.Arena;
+                    rawResponse.message = $"Stream ID: {stream.streamID} Counts reset";
+                    rawResponse.from = "";
+
+                    player._client.send(rawResponse);
+                }
+
+                return;
+            }
             if (pkt.message == "?diag")
             {
                 // Raw diagnostic output.

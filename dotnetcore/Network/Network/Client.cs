@@ -97,7 +97,6 @@ namespace InfServer.Protocol
                 streamID = sID;
                 C2S_Reliable = 65500;
                 S2C_Reliable = 65500;
-                S2C_ReliableConfirmed = 65500;
 
                 reliablePackets = new SortedDictionary<ushort, ReliableInfo>();
                 oosReliable = new SortedDictionary<ushort, PacketBase>();
