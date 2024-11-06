@@ -93,8 +93,8 @@ namespace InfServer.Protocol
             public StreamState(int sID)
             {
                 streamID = sID;
-                C2S_Reliable = 65500;
-                S2C_Reliable = 65500;
+                C2S_Reliable = 0;
+                S2C_Reliable = 0;
 
                 reliablePackets = new SortedDictionary<ushort, ReliableInfo>();
                 oosReliable = new SortedDictionary<ushort, PacketBase>();
@@ -540,11 +540,10 @@ namespace InfServer.Protocol
         /// </summary>
         public void confirmReliable(ushort rID, int streamID)
         {	//Great!
-            Log.write(TLog.Inane, "Confirmed packet: {0}", rID);
             using (DdMonitor.Lock(_sync))
             {	//Get the relevant stream
                 Client.StreamState stream = _streams[streamID];
-                Log.write(TLog.Inane, "Inside lock before loop");
+
                 //This satisfies all packets inbetween
                 for (ushort i = stream.S2C_ReliableConfirmed; i <= rID; ++i)
                 {	//Get our associated info
@@ -564,9 +563,8 @@ namespace InfServer.Protocol
                     else
                         ri.onCompleted();
                 }
-                Log.write(TLog.Inane, "Past loop, before increment")
+
                 stream.S2C_ReliableConfirmed = (ushort)(rID + 1);
-                Log.write(TLog.Inane, "After inrement, new value is {0}", stream.S2C_Reliable)
             }
         }
 
