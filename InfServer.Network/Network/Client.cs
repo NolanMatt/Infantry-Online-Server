@@ -93,8 +93,9 @@ namespace InfServer.Protocol
             public StreamState(int sID)
             {
                 streamID = sID;
-                C2S_Reliable = 0;
-                S2C_Reliable = 0;
+                C2S_Reliable = 65500;
+                S2C_Reliable = 65500;
+                S2C_ReliableConfirmed = 65500;
 
                 reliablePackets = new SortedDictionary<ushort, ReliableInfo>();
                 oosReliable = new SortedDictionary<ushort, PacketBase>();
@@ -540,6 +541,7 @@ namespace InfServer.Protocol
         /// </summary>
         public void confirmReliable(ushort rID, int streamID)
         {	//Great!
+            Log.write(TLog.Inane, "Confirmed packet: {0}", rID);
             using (DdMonitor.Lock(_sync))
             {	//Get the relevant stream
                 Client.StreamState stream = _streams[streamID];

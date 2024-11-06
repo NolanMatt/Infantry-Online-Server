@@ -95,8 +95,9 @@ namespace InfServer.Protocol
             public StreamState(int sID)
             {
                 streamID = sID;
-                C2S_Reliable = 0;
-                S2C_Reliable = 0;
+                C2S_Reliable = 65500;
+                S2C_Reliable = 65500;
+                S2C_ReliableConfirmed = 65500;
 
                 reliablePackets = new SortedDictionary<ushort, ReliableInfo>();
                 oosReliable = new SortedDictionary<ushort, PacketBase>();
@@ -311,14 +312,14 @@ namespace InfServer.Protocol
                 
                 if (connectionTimeout != -1 && !_bClientConn && now - base._lastPacketRecv > connectionTimeout)
                 {	//Farewell~
-                    Log.write(TLog.Warning, "Client timeout: {0}", this);
+                    Log.write(TLog.Inane, "Client timeout: {0}", this);
                     destroy();
                     return;
                 }
 
                 if (_tickDestroy > 0 && now - _tickDestroy > 15000) //15 seconds (gives enough time to send any queued messages)
                 {   //Farewell~
-                    Log.write(TLog.Warning, "Client timeout: {0}", this);
+                    Log.write(TLog.Inane, "Client timeout: {0}", this);
                     destroy();
                     return;
                 }
@@ -534,7 +535,7 @@ namespace InfServer.Protocol
                     {
                         ri.attempts++;
 
-                        //Log.write(TLog.Warning, "Reliable packet #" + ri.rid + " lost. (" + ri.attempts + ")");
+                        //Log.write(TLog.Inane, "Reliable packet #" + ri.rid + " lost. (" + ri.attempts + ")");
                     }
 
                     ri.timeSent = Environment.TickCount;
@@ -568,7 +569,7 @@ namespace InfServer.Protocol
                 {
                     ri.attempts++;
 
-                    //Log.write(TLog.Warning, "Reliable packet #" + ri.rid + " lost. (" + ri.attempts + ")");
+                    //Log.write(TLog.Inane, "Reliable packet #" + ri.rid + " lost. (" + ri.attempts + ")");
                 }
 
                 ri.timeSent = Environment.TickCount;
@@ -587,18 +588,19 @@ namespace InfServer.Protocol
         /// </summary>
         public void confirmReliable(ushort rID, int streamID)
         {	//Great!
+         Log.write(TLog.Inane, "Confirmed packet: {0}", rID);
             using (DdMonitor.Lock(_sync))
             {	//Get the relevant stream
                 Client.StreamState stream = _streams[streamID];
 
                 if (stream.S2C_ReliableConfirmed == ushort.MaxValue)
                 {
-                    Log.write(TLog.Warning, $"confirmReliable: Reached MaxValue. S2C_ReliableConfirmed: {stream.S2C_ReliableConfirmed}, rID: {rID}");
+                    Log.write(TLog.Inane, $"confirmReliable: Reached MaxValue. S2C_ReliableConfirmed: {stream.S2C_ReliableConfirmed}, rID: {rID}");
                 }
 
                 if (stream.S2C_ReliableConfirmed == ushort.MaxValue - 1)
                 {
-                    Log.write(TLog.Warning, $"confirmReliable: Reached MaxValue - 1. S2C_ReliableConfirmed: {stream.S2C_ReliableConfirmed}, rID: {rID}");
+                    Log.write(TLog.Inane, $"confirmReliable: Reached MaxValue - 1. S2C_ReliableConfirmed: {stream.S2C_ReliableConfirmed}, rID: {rID}");
                 }
 
                 //This satisfies all packets inbetween
@@ -626,12 +628,12 @@ namespace InfServer.Protocol
 
                 if (stream.S2C_ReliableConfirmed == ushort.MaxValue - 1)
                 {
-                    Log.write(TLog.Warning, $"confirmReliable: Advanced to MaxValue - 1. S2C_ReliableConfirmed: {stream.S2C_ReliableConfirmed}, rID: {rID}");
+                    Log.write(TLog.Inane, $"confirmReliable: Advanced to MaxValue - 1. S2C_ReliableConfirmed: {stream.S2C_ReliableConfirmed}, rID: {rID}");
                 }
 
                 if (stream.S2C_ReliableConfirmed == ushort.MaxValue)
                 {
-                    Log.write(TLog.Warning, $"confirmReliable: Advanced to MaxValue. S2C_ReliableConfirmed: {stream.S2C_ReliableConfirmed}, rID: {rID}");
+                    Log.write(TLog.Inane, $"confirmReliable: Advanced to MaxValue. S2C_ReliableConfirmed: {stream.S2C_ReliableConfirmed}, rID: {rID}");
                 }
             }
         }
